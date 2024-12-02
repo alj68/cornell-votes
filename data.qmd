@@ -26,9 +26,24 @@ The objective of this project was to process and harmonize voting-related datase
 To prepare for combining all datasets into a single dataframe, we added a new column named `year` to each dataset to indicate the corresponding election year. This ensured the data could be differentiated after merging. The unified dataset is now ready for further analysis, such as comparing voting rates, registration rates, and demographic trends over time.
 
 A description of each variable (column) is as follows:
-- corn-reg-rate: the percentage of voting-eligible students who registered to vote.
-- corn-vote-rate: the percentage of eligible students who voted on Election Day.
-- goal-rate: 
+- corn_reg_rate: the percentage of voting-eligible students who registered to vote.
+- corn_vote_rate: the percentage of eligible students who voted on Election Day.
+- goal_rate: the voting rate of all research institutions, our goal voting rate.
+- method_nonperson: the percentage of people who voted absentee/by mail.
+- method_early: the percentage of people who voted early.
+- method_person: the percentage of people who voted in person.
+- method-unknown: the percentage of people whose voting method is unknown.
+- age1: the voting rate of people between ages 18-21.
+- age2: the voting rate of people between ages 22-24.
+- age3: the voting rate of people between ages 25-29.
+- age4: the voting rate of people between ages 30-39.
+- age5: the voting rate of people between ages 40-49.
+- age6: the voting rate of people aged 50+.
+- ugrad: the voting rate of undergraduate students.
+- grad: the voting rate of graduate students.
+- fresh: the voting rate for first-year undergraduates (freshmen).
+- soph: the voting rate for second-year undergraduates (sophomores).
+- up: the voting rate for upperclass undergraduates (juniors and seniors).
 
 
 ``` {r}
@@ -116,6 +131,7 @@ combined_data <- rbind(data_2012,
                        data_2018,
                        data_2020,
                        data_2022)
+
 ```
 
 ## Data Analysis 
@@ -123,11 +139,25 @@ combined_data <- rbind(data_2012,
 Research Question: How can Cornell University sustain or improve its voter turnout rates to remain at or above the average voting rates of private research institutions?
 
 ``` {r}
-ggplot(combined_data, aes(x = year)) +
+ggplot(data = combined_data, aes(x = year)) +
   geom_line(aes(y = corn_vote_rate, color = "Cornell Vote Rate")) +
-  geom_line(aes(y = usa_vote_rate, color = "USA Vote Rate")) +
-  labs(title = "Voting Rates Over Time", x = "Year", y = "Vote Rate (%)")
-
+  geom_line(aes(y = goal_rate, color = "Goal Rate")) +
+  labs(title = "Voting Rates Over Time", x = "Year", y = "Vote Rate (%)", color = "Legend") +
+  scale_x_continuous(
+    breaks = combined_data$year,
+  )
 ```
+``` {r}
+voting_method_long <- pivot_longer(
+  combined_data, 
+  cols = c(method_person, method_early, method_nonperson, method_unknown),
+                                 names_to = "voting_method", values_to = "vote_rate")
 
+ggplot(voting_method_long, aes(x = factor(year), y = vote_rate, fill = voting_method)) +
+  geom_bar(stat = "identity") +  # Create the stacked bar chart
+  labs(title = "Voting Methods Over Time",
+       x = "Election Year", y = "Voting Rate (%)", fill = "Voting Method") +  # Labels
+  theme_minimal() +  # Clean theme
+  theme(legend.position = "bottom")
+```
 
