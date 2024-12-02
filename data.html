@@ -156,10 +156,7 @@ The following object is masked from 'package:readr':
 <p>The data analyzed in this project comes from Cornell University’s NSLVE (National Study of Learning, Voting, and Engagement) reports for the years 2012-2020. These reports provide detailed insights into student voter participation, including registration rates, voting rates, and voting methods. The data is disaggregated by demographic and academic characteristics such as age, gender, field of study, and enrollment status. Adjustments have been made to exclude ineligible voters, such as non-resident aliens, based on institutional records. The reports compare Cornell’s performance to averages across similar institutions, which is where our primary focus lies.</p>
 <p>The objective of this project was to process and harmonize voting-related datasets across multiple election years to enable the comparison of demographic statistics between 2012 and 2022. Two datasets containing 2016 and 2018 data contained conflicting but similar values. To resolve these inconsistencies, we averaged the numeric columns by computing the mean of corresponding values.</p>
 <p>To prepare for combining all datasets into a single dataframe, we added a new column named <code>year</code> to each dataset to indicate the corresponding election year. This ensured the data could be differentiated after merging. The unified dataset is now ready for further analysis, such as comparing voting rates, registration rates, and demographic trends over time.</p>
-</section>
-<section id="data-analysis" class="level2">
-<h2 class="anchored" data-anchor-id="data-analysis">Data Analysis</h2>
-<p>Research Question: How can Cornell University sustain or improve its voter turnout rates to remain at or above the average voting rates of private research institutions?</p>
+<p>A description of each variable (column) is as follows: - corn-reg-rate: the percentage of voting-eligible students who registered to vote. - corn-vote-rate: the percentage of eligible students who voted on Election Day. - goal-rate:</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>data_2012 <span class="ot">&lt;-</span></span>
 <span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">read_excel</span>(</span>
@@ -246,6 +243,10 @@ The following object is masked from 'package:readr':
 <span id="cb8-83"><a href="#cb8-83" aria-hidden="true" tabindex="-1"></a>                       data_2020,</span>
 <span id="cb8-84"><a href="#cb8-84" aria-hidden="true" tabindex="-1"></a>                       data_2022)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
+</section>
+<section id="data-analysis" class="level2">
+<h2 class="anchored" data-anchor-id="data-analysis">Data Analysis</h2>
+<p>Research Question: How can Cornell University sustain or improve its voter turnout rates to remain at or above the average voting rates of private research institutions?</p>
 </section>
 
 </main>

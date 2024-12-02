@@ -10,6 +10,7 @@ library(tidyverse)
 library(viridis)
 library(scales)
 library(readxl)
+library(ggplot2)
 ```
 
 ## Introduction 
@@ -24,9 +25,11 @@ The objective of this project was to process and harmonize voting-related datase
 
 To prepare for combining all datasets into a single dataframe, we added a new column named `year` to each dataset to indicate the corresponding election year. This ensured the data could be differentiated after merging. The unified dataset is now ready for further analysis, such as comparing voting rates, registration rates, and demographic trends over time.
 
-## Data Analysis 
+A description of each variable (column) is as follows:
+- corn-reg-rate: the percentage of voting-eligible students who registered to vote.
+- corn-vote-rate: the percentage of eligible students who voted on Election Day.
+- goal-rate: 
 
-Research Question: How can Cornell University sustain or improve its voter turnout rates to remain at or above the average voting rates of private research institutions? 
 
 ``` {r}
 data_2012 <-
@@ -113,10 +116,18 @@ combined_data <- rbind(data_2012,
                        data_2018,
                        data_2020,
                        data_2022)
-
 ```
 
+## Data Analysis 
 
+Research Question: How can Cornell University sustain or improve its voter turnout rates to remain at or above the average voting rates of private research institutions?
 
+``` {r}
+ggplot(combined_data, aes(x = year)) +
+  geom_line(aes(y = corn_vote_rate, color = "Cornell Vote Rate")) +
+  geom_line(aes(y = usa_vote_rate, color = "USA Vote Rate")) +
+  labs(title = "Voting Rates Over Time", x = "Year", y = "Vote Rate (%)")
+
+```
 
 
