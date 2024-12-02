@@ -1,0 +1,122 @@
+---
+title: Data Analysis for Cornell Votes
+author: Adriana Lorena Jimenez Bonilla
+date: Dec 2024
+format: html
+---
+
+``` {r}
+library(tidyverse)
+library(viridis)
+library(scales)
+library(readxl)
+```
+
+## Introduction 
+
+This project focuses on analyzing and communicating insights from Cornell's NSLVE (National Study of Learning, Voting, and Engagement) reports. These reports provide data on student voter participation, serving as a foundation to strategize and enhance voting efforts on campus. The ultimate goal is to ensure Cornell's voting rate remains at or above the average voting rates of similar institutions in NSLVE. In this case, similar institutions consist of private research institutions.
+
+## Data Description
+
+The data analyzed in this project comes from Cornell University’s NSLVE (National Study of Learning, Voting, and Engagement) reports for the years 2012-2020. These reports provide detailed insights into student voter participation, including registration rates, voting rates, and voting methods. The data is disaggregated by demographic and academic characteristics such as age, gender, field of study, and enrollment status. Adjustments have been made to exclude ineligible voters, such as non-resident aliens, based on institutional records. The reports compare Cornell's performance to averages across similar institutions, which is where our primary focus lies.
+
+The objective of this project was to process and harmonize voting-related datasets across multiple election years to enable the comparison of demographic statistics between 2012 and 2022. Two datasets containing 2016 and 2018 data contained conflicting but similar values. To resolve these inconsistencies, we averaged the numeric columns by computing the mean of corresponding values.
+
+To prepare for combining all datasets into a single dataframe, we added a new column named `year` to each dataset to indicate the corresponding election year. This ensured the data could be differentiated after merging. The unified dataset is now ready for further analysis, such as comparing voting rates, registration rates, and demographic trends over time.
+
+## Data Analysis 
+
+Research Question: How can Cornell University sustain or improve its voter turnout rates to remain at or above the average voting rates of private research institutions? 
+
+``` {r}
+data_2012 <-
+  read_excel(
+    "~/Desktop/Downloads/Einhorn Center/Voting Data Project/Yearly Voting Data.xlsx",
+    sheet = "voting-2012",
+    na = "null"
+  )
+
+data_2014 <-
+  read_excel(
+    "~/Desktop/Downloads/Einhorn Center/Voting Data Project/Yearly Voting Data.xlsx",
+    sheet = "voting-2014",
+    na = "null"
+  )
+
+data_20161 <-
+  read_excel(
+    "~/Desktop/Downloads/Einhorn Center/Voting Data Project/Yearly Voting Data.xlsx",
+    sheet = "voting-2016-1",
+    na = "null"
+  )
+
+data_20162 <-
+  read_excel(
+    "~/Desktop/Downloads/Einhorn Center/Voting Data Project/Yearly Voting Data.xlsx",
+    sheet = "voting-2016-2",
+    na = "null"
+  )
+
+data_20181 <-
+  read_excel(
+    "~/Desktop/Downloads/Einhorn Center/Voting Data Project/Yearly Voting Data.xlsx",
+    sheet = "voting-2018-1",
+    na = "null"
+  )
+
+data_20182 <-
+  read_excel(
+    "~/Desktop/Downloads/Einhorn Center/Voting Data Project/Yearly Voting Data.xlsx",
+    sheet = "voting-2018-2",
+    na = "null"
+  )
+
+data_2020 <-
+  read_excel(
+    "~/Desktop/Downloads/Einhorn Center/Voting Data Project/Yearly Voting Data.xlsx",
+    sheet = "voting-2020",
+    na = "null"
+  )
+
+data_2022 <-
+  read_excel(
+    "~/Desktop/Downloads/Einhorn Center/Voting Data Project/Yearly Voting Data.xlsx",
+    sheet = "voting-2022",
+    na = "null"
+  )
+
+data_fos <-
+  read_excel(
+    "~/Desktop/Downloads/Einhorn Center/Voting Data Project/Field of Study Voting Data.xlsx",
+    na = "null"
+  )
+
+
+data_2012$year <- 2012
+data_2014$year <- 2014
+data_20161$year <- 2016
+data_20162$year <- 2016
+data_20181$year <- 2018
+data_20182$year <- 2018
+data_2020$year <- 2020
+data_2022$year <- 2022
+
+data_2016 <- data_20161 %>%
+  mutate(across(everything(), ~ (. + data_20162[[cur_column()]]) / 2))
+
+data_2018 <- data_20181 %>%
+  mutate(across(everything(), ~ (. + data_20182[[cur_column()]]) / 2))
+
+combined_data <- rbind(data_2012,
+                       data_2014,
+                       data_2016,
+                       data_2018,
+                       data_2020,
+                       data_2022)
+
+```
+
+
+
+
+
