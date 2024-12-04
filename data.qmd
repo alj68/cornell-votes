@@ -192,15 +192,15 @@ ggplot(voting_method_long, aes(x = factor(year), y = vote_rate, fill = voting_me
 While Cornell Votes makes an active effort not to persuade prospective voters toward any one voting method, it may be beneficial to consider trends among students so we can best support whatever methods they choose. 
 
 ``` {r}
-combined_data_long <- combined_data %>%
-  gather(key = "age_group", value = "vote_rate", age1, age2, age3, age4, age5, age6)
+combined_data_long <- combined_data |>
+  gather(key = "age_group", value = "vote_rate", age1, age2, age3, age4, age5, age6, goal_rate)
 
 ggplot(data = combined_data_long, aes(x = year, y = vote_rate, color = age_group)) +
   geom_line() +
   scale_color_manual(
-    values = c("age1" = "darkred", 
-               "age2" = "darkblue", "age3" = "darkgreen", "age4" = "purple", "age5" = "hotpink", "age6" = "darkorange"),
-    labels = c("18-21", "22-24", "25-29", "30-39", "40-49", "50+")
+    values = c("age1" = "red", 
+               "age2" = "blue", "age3" = "green", "age4" = "purple", "age5" = "hotpink", "age6" = "darkorange", "goal_rate" = "black"),
+    labels = c("18-21", "22-24", "25-29", "30-39", "40-49", "50+", "Goal Rate")
   ) +
   labs(title = "Voting Rates Over Time", 
        x = "Year", 
@@ -211,11 +211,18 @@ ggplot(data = combined_data_long, aes(x = year, y = vote_rate, color = age_group
   ) + theme_classic()
 ```
 
-Let's focus on two very general trends. The youngest and oldest age groups, ages 18-21 and 50+, see a sharp decrease in voting rate during midterm elections. Meanwhile, age groups in between were consistently increasing (although less rapidly), until a uniform drop from the 2020 election to the 2022 election. Deeper insights may be available when 2024 data is accessible.
+The only group consistently at or above our goal rate is voters aged 50+. Second best, the group of voters ages 40-49, is interestingly above our goal during midterm elections while below our goal during presidential elections. If we focus on the remaining population, voters age 18-21 are consistently the most active during presidential elections, but have the steepest decline during midterm elections. Groups 22-24, 25-29, and 30-39 saw increases between 2014-2020, but dropped again in 2022. How can we make people care about midterm elections, and make that care everlasting?
 
 ``` {r}
-combined_data_long <- combined_data %>%
-  gather(key = "class", value = "vote_rate", fresh, soph, up, ugrad, grad) |> filter(!is.na(vote_rate))
+combined_data_long <- combined_data |>
+  gather(key = "class", value = "vote_rate", fresh, soph, up, ugrad, grad, goal_rate) |> filter(!is.na(vote_rate)) |>
+  mutate(class = recode(class,
+                        "fresh" = "Freshmen",
+                        "soph" = "Sophomores",
+                        "up" = "Upperclassmen",
+                        "ugrad" = "Undergraduates",
+                        "grad" = "Graduates",
+                        "goal_rate" = "Goal Rate"))
 
 ggplot(data = combined_data_long, aes(x = year, y = vote_rate, color = class, group = class)) +
   geom_line() +
@@ -224,24 +231,25 @@ ggplot(data = combined_data_long, aes(x = year, y = vote_rate, color = class, gr
        y = "Vote Rate (%)", 
        color = "Class Year/Type") +
   scale_color_manual(
-    values = c("fresh" = "darkred", 
-               "soph" = "darkblue", 
-               "up" = "darkgreen", 
-               "ugrad" = "purple", 
-               "grad" = "darkorange")
+    values = c("Freshmen" = "darkred", 
+               "Sophomores" = "darkblue", 
+               "Upperclassmen" = "darkgreen", 
+               "Undergraduates" = "purple", 
+               "Graduates" = "darkorange",
+               "Goal Rate" = "black")
   ) +
   scale_x_continuous(
     breaks = combined_data_long$year
   ) + theme_classic()
 ```
 
-While some data was unavailable, making the graph incomplete, we can still note a few things. Notice that, from 2012-2016, freshmen, sophomores, and upperclassmen moving in nearly identical trends. Then, from 2016-2022, we see that changes in undergraduate student voting rates are more drastic from year-to-year than that of graduate students. Also, notice that from 2016-2018 undergraduate voting rates dropped, while that of graduate students increased. Why might that be?
+While some data was unavailable, making the graph incomplete, we can still note a few things. We see that, from 2012-2016, freshmen, sophomores, and upperclassmen moving in nearly identical trends. Then, from 2016-2022, we see that changes in undergraduate student voting rates are more drastic from year-to-year than that of graduate students. Notice that from 2016-2018 undergraduate voting rates seem to diverge from our goal rate, while that of graduate students converges towards it. Why might that be?
 
-The two previous graphs reflect two key things: 1) young voters are more impressionable (i.e. more susceptible to changes in Cornell Votes' curriculum) and 2) young voters are less involved in midterm elections. Since voting is habit-forming, it may be important to consider why the spike in 2020 was followed by a consistent plummet across all ages in 2022. This presents the question, how can we retain high voting rates from year to year (i.e. how can we make people care about midterm elections?)
+The two previous graphs reflect two key things: 1) young voters are more impressionable (i.e. more susceptible to changes in Cornell Votes' curriculum) and 2) young voters are less involved in midterm elections. Since voting is habit-forming, it may be important to consider why the spike in 2020 was followed by a consistent plummet across all ages in 2022. This presents the question, how can we retain high voting rates from year to year (i.e. how can we make people care about midterm elections)?
 
 ``` {r}
 combined_data_long <- combined_data %>%
-  gather(key = "gender", value = "vote_rate", women, men) |> filter(!is.na(vote_rate))
+  gather(key = "gender", value = "vote_rate", women, men, goal_rate) |> filter(!is.na(vote_rate))
 
 ggplot(data = combined_data_long, aes(x = year, y = vote_rate, color = gender, group = gender)) +
   geom_line() +
@@ -251,18 +259,19 @@ ggplot(data = combined_data_long, aes(x = year, y = vote_rate, color = gender, g
        color = "Gender") +
   scale_color_manual(
     values = c("women" = "purple", 
-               "men" = "orange")
+               "men" = "orange",
+               "goal_rate" = "black")
   ) +
   scale_x_continuous(
     breaks = combined_data_long$year
   ) + theme_classic()
 ```
 
-While the trends are indentical, women consistently present a higher voting rate than men.
+While the trends are indentical, women consistently present a higher voting rate than men. Women actually surpassed our goal in 2020, before falling short of it in 2022. Men consistently present numbers below our goal.
 
 ``` {r}
 combined_data_long <- combined_data |>
-  gather(key = "race", value = "vote_rate", asian, black, native, hispanic, pacificisland, white, mixed) |> filter(!is.na(vote_rate))
+  gather(key = "race", value = "vote_rate", asian, black, native, hispanic, pacificisland, white, mixed, goal_rate) |> filter(!is.na(vote_rate))
 
 ggplot(data = combined_data_long, aes(x = year, y = vote_rate, color = race, group = race)) +
   geom_line() +
@@ -277,18 +286,19 @@ ggplot(data = combined_data_long, aes(x = year, y = vote_rate, color = race, gro
                "native" = "darkblue",
                "pacificisland" = "darkgreen",
                "white" = "purple",
-               "mixed" = "darkgrey")
+               "mixed" = "darkgrey",
+               "goal_rate" = "black")
   ) +
   scale_x_continuous(
     breaks = combined_data_long$year
   ) + theme_classic()
 ```
 
-While the trends are nearly identical, white students show consistently higher voting rates than that of minority races.
+While the trends are nearly identical, white students appear to vote above our target rate. How can we encourage minority students to vote?
 
 ```{r}
 outside_stem <- data_fos |>
-  select(year, Agriculture, Natural_Resources_and_Convervation, Physical_Sciences) |>
+  select(year, Agriculture, Natural_Resources_and_Convervation, Physical_Sciences, Goal) |>
   mutate(avg = rowMeans(cbind(Agriculture, Natural_Resources_and_Convervation, Physical_Sciences), na.rm = TRUE))
 
 social_sci <- data_fos |>
@@ -307,12 +317,19 @@ pre_prof <- data_fos |>
   select(year, Business_Management_and_Marketing, Legal_Professions_and_Studies, Health_Professions, Architecture) |>
   mutate(avg = rowMeans(cbind(Business_Management_and_Marketing, Legal_Professions_and_Studies, Health_Professions, Architecture), na.rm = TRUE))
 
+goal <- data_fos |> 
+  select(year, Goal) |> 
+  rename(avg = Goal) |> 
+  mutate(category = "Goal")
+
+
 combined_data <- bind_rows(
   outside_stem |> mutate(category = "Outside STEM"),
   social_sci |> mutate(category = "Social Sciences"),
   humanities |> mutate(category = "Humanities"),
   inside_stem |> mutate(category = "Inside STEM"),
-  pre_prof |> mutate(category = "Pre-Professional")
+  pre_prof |> mutate(category = "Pre-Professional"),
+  goal |> mutate(category = "Goal")
 )
 
 field_colors <- c(
@@ -320,10 +337,9 @@ field_colors <- c(
   "Social Sciences" = "#D62728",     # Medium Red
   "Pre-Professional" = "#9467BD",    # Teal
   "Humanities" = "#FF7F0E",          # Golden Yellow
-  "Inside STEM" = "#2CA02C"
+  "Inside STEM" = "#2CA02C",
+  "Goal" = "black"
 )
-
-combined_data$year <- as.factor(combined_data$year)
 
 ggplot(combined_data, aes(x = year, y = avg, color = category, group = category)) +
   geom_line() + 
@@ -346,4 +362,8 @@ The primary dataset used in this project represents the average values of studen
   - Pre-Professional: Architecture, Business Management and Marketing, Legal Professions and Studies, Health Professions.
   - Social Sciences: Area, Ethnic, Cultural, and Gender Studies, Family and Consumer Human Sciences, Psychology, Public Administration and Social Services, Social Sciences.
 
-Looking at the generalized disciplines above, we see that general trends are similar, but some groups are consistently less than or greater than others. For example, `Inside STEM'
+Looking at the generalized disciplines above, we see that general trends are similar, but some groups are consistently less than or greater than others. The only group who performed above our goal in any given year was `Outside STEM` in 2020. Let's look at how others have diverged/converged. Do we notice anything?
+
+## Key Takeaways
+
+## Ideas for the Future
