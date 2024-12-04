@@ -3,6 +3,11 @@ title: Data Analysis for Cornell Votes
 author: Adriana Lorena Jimenez Bonilla
 date: Dec 2024
 format: pdf
+knitr:
+  opts_chunk:
+    echo: false
+    message: false
+    warning: false
 ---
 
 ``` {r}
@@ -256,7 +261,7 @@ ggplot(data = combined_data_long, aes(x = year, y = vote_rate, color = gender, g
 While the trends are indentical, women consistently present a higher voting rate than men.
 
 ``` {r}
-combined_data_long <- combined_data %>%
+combined_data_long <- combined_data |>
   gather(key = "race", value = "vote_rate", asian, black, native, hispanic, pacificisland, white, mixed) |> filter(!is.na(vote_rate))
 
 ggplot(data = combined_data_long, aes(x = year, y = vote_rate, color = race, group = race)) +
@@ -282,32 +287,63 @@ ggplot(data = combined_data_long, aes(x = year, y = vote_rate, color = race, gro
 While the trends are nearly identical, white students show consistently higher voting rates than that of minority races.
 
 ```{r}
-fos_long <- data_fos |>
-  gather(key = "fos", value = "vote_rate", Agriculture, Architecture, Area_Ethnic_Cultural_and_Gender_Studies, Biological_and_Biomedical_Sciences, Business_Management_and_Marketing, Communication_and_Journalism, Computer_and_Information_Sciences, Engineering_and_Engineering_Technologies, English_Language_and_Literature, Family_and_Consumer_Human_Sciences, Foreign_Languages_Literatures_and_Linguistics, Health_Professions, History, Legal_Professions_and_Studies, Liberal_Arts_and_Sciences_and_Humanities, Mathematics_and_Statistics, Multi_Interdisciplinary_Studies, Natural_Resources_and_Convervation, Philosophy_and_Religious_Studies, Physical_Sciences, Psychology, Public_Administation_and_Social_Services, Social_Sciences, Visual_and_Performing_Arts, Unknown) %>%
-  filter(!is.na(vote_rate))
+outside_stem <- data_fos |>
+  select(year, Agriculture, Natural_Resources_and_Convervation, Physical_Sciences) |>
+  mutate(avg = rowMeans(cbind(Agriculture, Natural_Resources_and_Convervation, Physical_Sciences), na.rm = TRUE))
 
-ggplot(data = fos_long, aes(x = year, y = vote_rate, color = fos, group = fos)) +
-  geom_line() +
-  labs(title = "Voting Rates Over Time by Field of Study", 
-       x = "Year", 
-       y = "Vote Rate (%)", 
-       color = "Field of Study") +
-  scale_x_continuous(
-    breaks = unique(fos_long$year)  # Adjust x-axis to only include unique years
-  ) +
-  theme_classic() +
-  theme(
-    strip.text = element_text(size = 12),  # Optional: adjust facet label size
-    legend.position = "right",  # Position the legend to the right
-    legend.key.size = unit(0.5, "cm"),  # Adjust size of legend keys
-    legend.text = element_text(size = 8),  # Adjust size of legend text
-    legend.title = element_text(size = 10)  # Adjust size of legend title
-  ) +
-  guides(
-    color = guide_legend(
-      ncol = 2,  # Set the number of columns for the legend
-      byrow = TRUE  # Arrange the legend items by row
-    )
-  )
+social_sci <- data_fos |>
+  select(year, Area_Ethnic_Cultural_and_Gender_Studies, Family_and_Consumer_Human_Sciences, Psychology, Public_Administation_and_Social_Services, Social_Sciences) |>
+  mutate(avg = rowMeans(cbind(Area_Ethnic_Cultural_and_Gender_Studies, Family_and_Consumer_Human_Sciences, Psychology, Public_Administation_and_Social_Services, Social_Sciences), na.rm = TRUE))
 
+humanities <- data_fos |>
+  select(year, History, Philosophy_and_Religious_Studies, Liberal_Arts_and_Sciences_and_Humanities, Communication_and_Journalism, Foreign_Languages_Literatures_and_Linguistics, Visual_and_Performing_Arts) |>
+  mutate(avg = rowMeans(cbind(History, Philosophy_and_Religious_Studies, Liberal_Arts_and_Sciences_and_Humanities, Communication_and_Journalism, Foreign_Languages_Literatures_and_Linguistics, Visual_and_Performing_Arts), na.rm = TRUE))
+
+inside_stem <- data_fos |>
+  select(year, Biological_and_Biomedical_Sciences, Computer_and_Information_Sciences, Engineering_and_Engineering_Technologies, Mathematics_and_Statistics) |>
+  mutate(avg = rowMeans(cbind(Biological_and_Biomedical_Sciences, Computer_and_Information_Sciences, Engineering_and_Engineering_Technologies, Mathematics_and_Statistics), na.rm = TRUE))
+
+pre_prof <- data_fos |>
+  select(year, Business_Management_and_Marketing, Legal_Professions_and_Studies, Health_Professions, Architecture) |>
+  mutate(avg = rowMeans(cbind(Business_Management_and_Marketing, Legal_Professions_and_Studies, Health_Professions, Architecture), na.rm = TRUE))
+
+combined_data <- bind_rows(
+  outside_stem |> mutate(category = "Outside STEM"),
+  social_sci |> mutate(category = "Social Sciences"),
+  humanities |> mutate(category = "Humanities"),
+  inside_stem |> mutate(category = "Inside STEM"),
+  pre_prof |> mutate(category = "Pre-Professional")
+)
+
+field_colors <- c(
+  "Outside STEM" = "#1F77B4",   # Dark Blue (for contrast)
+  "Social Sciences" = "#D62728",     # Medium Red
+  "Pre-Professional" = "#9467BD",    # Teal
+  "Humanities" = "#FF7F0E",          # Golden Yellow
+  "Inside STEM" = "#2CA02C"
+)
+
+combined_data$year <- as.factor(combined_data$year)
+
+ggplot(combined_data, aes(x = year, y = avg, color = category, group = category)) +
+  geom_line() + 
+  labs(
+    title = "Average Field of Study Voting Trends Over Time",
+    x = "Year",
+    y = "Average Value",
+    color = "Category"
+  ) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  scale_y_continuous(expand = c(0.1, 0.1)) + 
+  scale_color_manual(values = field_colors)
 ```
+The primary dataset used in this project represents the average values of students' participation in various fields of study at Cornell University over multiple years. To simplify the analysis and highlight overarching trends, I categorized the individual fields of study into broader, more manageable groups based on their similarities and common themes. These categories reflect key academic disciplines and their intersections, helping us to observe trends in educational patterns and make comparisons across different areas of study. Here’s how I divided the fields of study into categories:
+
+  - Humanities: History, Philosophy and Religious Studies, Liberal Arts and Sciences and Humanities, Communication and Journalism.
+  - Inside STEM: Biological and Biomedical Sciences, Computer and Information Sciences, Engineering and Engineering Technologies, Mathematics and Statistics.
+  - Outside STEM: Agriculture, Natural Resources and Conservation, Physical Sciences.
+  - Pre-Professional: Architecture, Business Management and Marketing, Legal Professions and Studies, Health Professions.
+  - Social Sciences: Area, Ethnic, Cultural, and Gender Studies, Family and Consumer Human Sciences, Psychology, Public Administration and Social Services, Social Sciences.
+
+Looking at the generalized disciplines above, we see that general trends are similar, but some groups are consistently less than or greater than others. For example, `Inside STEM'
